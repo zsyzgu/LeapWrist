@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Leap;
+using System;
+using System.Runtime.InteropServices;
 
 public class HandControl : MonoBehaviour {
     const int HAND_DATA_LEN = 60;
+    const int FEATURES_LEN = 768;
 
     const int SPHERES = 20;
     const int CYLINERS = 15;
@@ -47,10 +50,24 @@ public class HandControl : MonoBehaviour {
         return handData;
     }
 
-    private float[] getHandDataFromLeapWrist()
+    [DllImport("LeapWrist", EntryPoint = "getImageFeatures")]
+    private static extern IntPtr getImageFeatures();
+
+    [DllImport("LeapWrist", EntryPoint = "getHandData")]
+    private static extern IntPtr getHandData();
+
+    public static float[] getHandDataFromLeapWrist()
     {
-        float[] handData = null;
+        float[] handData = new float[HAND_DATA_LEN];
+        Marshal.Copy(getHandData(), handData, 0, HAND_DATA_LEN);
         return handData;
+    }
+
+    public static int[] getFeatures()
+    {
+        int[] features = new int[FEATURES_LEN];
+        Marshal.Copy(getImageFeatures(), features, 0, FEATURES_LEN);
+        return features;
     }
 
     void updateHand(float[] handData)
